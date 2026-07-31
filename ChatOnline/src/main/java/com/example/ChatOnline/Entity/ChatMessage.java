@@ -20,11 +20,11 @@ public class ChatMessage {
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "conversation_id", nullable = false)
+    @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @Column(name = "sender_id", nullable = false)
+    @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
     @Enumerated(EnumType.STRING) // Lưu tên Enum vào Database
