@@ -37,7 +37,7 @@ public class JwtService {
                 .issueTime(issueTime)
                 .expirationTime(expireTime)
                 .jwtID(jwtId)
-                .claim("AUTHORITIES", authorities)
+                .claim("roles", authorities)
                 .build();
 
         //payload
