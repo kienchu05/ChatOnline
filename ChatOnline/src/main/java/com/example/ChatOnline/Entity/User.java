@@ -29,6 +29,8 @@ public class User implements UserDetails {
 
     private String email;
 
+    private String refreshToken;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default //Đảm bảo list không bao giờ bị null khi build object
     private List<UserHasRole> userHasRoles = new ArrayList<>();
