@@ -47,6 +47,7 @@ public class JwtService {
         try {
             jwsObject.sign(new MACSigner(secretKey));
         } catch (JOSEException e) {
+            log.error("Không thể tạo token: ", e);
             throw new AppException(ErrorCode.TOKEN_GENERATION_FAILED);
         }
 

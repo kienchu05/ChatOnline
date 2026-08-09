@@ -45,4 +45,12 @@ public class Conversation {
     private String lastMessageContent;
 
     private LocalDateTime lastMessageTime;
+
+    //Helper method de them participants vao conversation
+    public void addParticipants(User user){
+        conversationParticipantList.add(ConversationParticipant.builder()
+                .conversation(this)
+                .user(user)
+                .build());
+    }
 }

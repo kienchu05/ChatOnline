@@ -29,6 +29,7 @@ public class ConversationParticipant {
     @JoinColumn(name = "conversation_id", nullable = false)
     private Conversation conversation;
 
+    @Builder.Default
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt =  LocalDateTime.now();
 }

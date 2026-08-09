@@ -29,6 +29,7 @@ public class User implements UserDetails {
 
     private String email;
 
+    @Column(columnDefinition = "TEXT")
     private String refreshToken;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
