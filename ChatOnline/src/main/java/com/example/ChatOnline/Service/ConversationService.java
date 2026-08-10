@@ -39,7 +39,7 @@ public class ConversationService {
             participantIds.add(creatorId);
         }
 
-        //Lay trong tin tat ca participants tu database
+        //Lay thong tin tat ca participants tu database
         List<User> participantsInfo = userRepository.findAllById(participantIds);
 
         //Kiem tra xem tat ca participants co ton tai hay khong
@@ -119,7 +119,7 @@ public class ConversationService {
         //Build response voi thong tin pagination
         return PageResponse.<ConversationDetailResponse>builder()
                 .currentPage(page) // Page number goc (1)
-                .pageSize(pageable.getPageSize())
+                .pageSize(pageable.getPageSize()) // so conversation trong 1 page
                 .totalPages(conversationPage.getTotalPages())
                 .totalElements(conversationPage.getTotalElements())
                 .content(responses)

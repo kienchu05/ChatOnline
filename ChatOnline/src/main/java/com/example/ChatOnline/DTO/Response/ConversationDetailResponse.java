@@ -19,7 +19,7 @@ public class ConversationDetailResponse implements Serializable {
     private String name;
     private ConversationType conversationType;
     private String conversationAvatar;
-    private List<ParticipantResponse> paticipants;
+    private List<ParticipantResponse> participantInfo;
 
     //Thong tin tin nhan cuoi cung
     private String lastMessageId;

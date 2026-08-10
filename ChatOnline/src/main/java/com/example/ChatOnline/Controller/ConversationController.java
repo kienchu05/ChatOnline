@@ -2,7 +2,9 @@ package com.example.ChatOnline.Controller;
 
 import com.example.ChatOnline.DTO.Request.CreateConversationRequest;
 import com.example.ChatOnline.DTO.Response.ApiResponse;
+import com.example.ChatOnline.DTO.Response.ConversationDetailResponse;
 import com.example.ChatOnline.DTO.Response.CreateConversationResponse;
+import com.example.ChatOnline.DTO.Response.PageResponse;
 import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Service.ConversationService;
 import jakarta.validation.Valid;
