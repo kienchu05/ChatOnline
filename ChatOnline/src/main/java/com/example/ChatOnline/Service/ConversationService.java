@@ -1,7 +1,10 @@
 package com.example.ChatOnline.Service;
 
 import com.example.ChatOnline.DTO.Request.CreateConversationRequest;
+import com.example.ChatOnline.DTO.Response.ApiResponse;
+import com.example.ChatOnline.DTO.Response.ConversationDetailResponse;
 import com.example.ChatOnline.DTO.Response.CreateConversationResponse;
+import com.example.ChatOnline.DTO.Response.PageResponse;
 import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Entity.ConversationParticipant;
 import com.example.ChatOnline.Entity.User;
@@ -12,6 +15,9 @@ import com.example.ChatOnline.Mapper.ConversationMapper;
 import com.example.ChatOnline.Repository.ConversationRepository;
 import com.example.ChatOnline.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -91,10 +97,32 @@ public class ConversationService {
 //                conversation.addParticipants(user);
 //            }
         participantsInfo.forEach(conversation::addParticipants);
-
         conversationRepository.save(conversation);
-
         //Map entity sang response DTO
         return ConversationMapper.toConversationResponse(creatorId, conversation);
+    }
+
+    public PageResponse<ConversationDetailResponse> getMyConversation(
+            String userId,
+            int page,
+            int size){
+        Pageable pageable = PageRequest.of(page - 1, size); // lay index tu chi so 0
+        //Query conversations tu database voi pagination
+        Page<Conversation> conversationPage = conversationRepository.findAllByUserId(userId, pageable);
+        //Lay ds conversation tu page object
+        List<Conversation> conversations = conversationPage.getContent();
+        //Map tu entity conversations sang DTO response
+        List<ConversationDetailResponse> responses = conversations.stream()
+                .map(conversation -> ConversationMapper.toConversationDetailResponse(userId, conversation))
+                .toList();
+
+        //Build response voi thong tin pagination
+        return PageResponse.<ConversationDetailResponse>builder()
+                .currentPage(page) // Page number goc (1)
+                .pageSize(pageable.getPageSize())
+                .totalPages(conversationPage.getTotalPages())
+                .totalElements(conversationPage.getTotalElements())
+                .content(responses)
+                .build();
     }
 }
