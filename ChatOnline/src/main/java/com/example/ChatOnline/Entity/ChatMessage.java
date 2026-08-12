@@ -27,6 +27,9 @@ public class ChatMessage {
     @JoinColumn(name = "sender_id", nullable = false)
     private User sender;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String content;
+
     @Enumerated(EnumType.STRING) // Lưu tên Enum vào Database
     @Column(name = "message_type", nullable = false)
     private MessageType messageType =  MessageType.TEXT;

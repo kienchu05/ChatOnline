@@ -16,7 +16,9 @@ public enum ErrorCode {
     PARTICIPANT_NOT_FOUND(404, "One or more participants not found", HttpStatus.NOT_FOUND),
     INVALID_PARTICIPANT_COUNT(400, "Private conversation requires exactly 2 participants", HttpStatus.BAD_REQUEST),
     CONVERSATION_NAME_REQUIRED(400, "Conversation name is required", HttpStatus.BAD_REQUEST),
-    GROUP_CONVERSATION_MINIMUM_THREE_PARTICIPANTS(400, "A group conversation must have at least three participants", HttpStatus.BAD_REQUEST);
+    GROUP_CONVERSATION_MINIMUM_THREE_PARTICIPANTS(400, "A group conversation must have at least three participants", HttpStatus.BAD_REQUEST),
+
+    NOT_CONVERSATION_MEMBER(403, "You are not a member of this conversation", HttpStatus.FORBIDDEN);
 
     private final int code;
     private final String message;

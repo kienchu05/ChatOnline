@@ -52,7 +52,6 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS));
         return http.build();
     }
-
     @Bean // ma hoa mat khau
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -64,6 +63,7 @@ public class SecurityConfiguration {
         provider.setPasswordEncoder(passwordEncoder());
         return new ProviderManager(provider);
     }
+
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter(){

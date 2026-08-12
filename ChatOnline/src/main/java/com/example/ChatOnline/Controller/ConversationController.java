@@ -43,7 +43,7 @@ public class ConversationController {
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size
     ){
-        var userId = jwt.getSubject();
+        var userId = jwt.getSubject(); //lay ra user tu jwt
         var data = conversationService.getMyConversation(userId, page, size);
 
         return ApiResponse.<PageResponse<ConversationDetailResponse>>builder()
