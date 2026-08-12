@@ -27,4 +27,7 @@ public interface ConversationRepository extends JpaRepository<Conversation, Stri
     @EntityGraph(attributePaths = {"conversationParticipantList", "conversationParticipantList.user"})
     @Query("select distinct c from Conversation c JOIN c.conversationParticipantList p where p.user.id = :userId order by c.lastMessageTime desc nulls last ")
     Page<Conversation> findAllByUserId(@Param("userId") String userId, Pageable pageable);
+
+    @Query("select c from Conversation c where c.id = :conversationId and exists(select p from c.conversationParticipantList p where p.user.id = :userId)")
+    Optional<Conversation> findByIdAndMember(String conversationId, String userId);
 }

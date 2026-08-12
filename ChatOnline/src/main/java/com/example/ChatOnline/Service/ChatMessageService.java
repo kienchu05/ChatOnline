@@ -34,7 +34,7 @@ public class ChatMessageService {
                 .orElseThrow(() ->  new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 2. Validate conversation ton tai va sender la member trong conversation do
-        Conversation conversation = conversationRepository.findByIdAndMember(request.coversationId(), senderId)
+        Conversation conversation = conversationRepository.findByIdAndMember(request.conversationId(), senderId)
                 .orElseThrow(() ->  new AppException(ErrorCode.NOT_CONVERSATION_MEMBER));
 
         // 3. Tao danh sach media files (neu co)
@@ -55,6 +55,10 @@ public class ChatMessageService {
                 .messageType(request.messageType())
                 .messageMediaList(media) // dc luu duoi dang JSON
                 .build();
+
+        // neu gui media ma khong luu message_id thi se bi loi nullpointer
+        //neu k gui media thi List<MessageMedia> media se null , khi do khong cascade sang entity MessageMedia nen se k can luu message_id
+        media.forEach(m -> m.setMessage(message));
 
         chatMessageRepository.save(message);
 
