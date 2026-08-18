@@ -2,6 +2,7 @@ package com.example.ChatOnline.Configuration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
@@ -12,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @RequiredArgsConstructor
 public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer { //Định nghĩa endpoint để clients connect
     private final WebsocketHandshake websocketHandshake;
+    private final ClientInboundAuthentication authentication;
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
@@ -35,5 +37,11 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
             // Cho phép gửi messages đến specific user session.
             // Mỗi user session có unique destination, đảm bảo message chỉ đến đúng người.
             registry.setUserDestinationPrefix("/user");
+        }
+
+        @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+            // Register ChannelInterceptor để authenticate STOMP CONNECT frames
+            registration.interceptors(authentication);
         }
 }
