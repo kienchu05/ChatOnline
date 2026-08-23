@@ -42,6 +42,12 @@ public class ConversationMapper {
     public static ConversationDetailResponse toConversationDetailResponse(String creatorId, Conversation conversation){
         ConversationType conversationType = conversation.getConversationType();
 
+        Boolean isRead = conversation.getConversationParticipantList().stream()
+                .filter(p -> p.getUser().getId().equals(creatorId))
+                .findFirst()
+                .map(ConversationParticipant::getIsRead)
+                .orElse(true);
+
         ConversationDetailResponse response = ConversationDetailResponse.builder()
                 .id(conversation.getId())
                 .conversationType(conversationType)
@@ -54,6 +60,7 @@ public class ConversationMapper {
                 .lastMessageTime(conversation.getLastMessageTime())
                 .lastMessageContent(conversation.getLastMessageContent())
                 .lastMessageId(conversation.getLastMessageId())
+                .isRead(isRead)
                 .build();
 
         //Ten cua conversation

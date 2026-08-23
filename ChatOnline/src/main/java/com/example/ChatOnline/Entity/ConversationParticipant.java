@@ -32,4 +32,7 @@ public class ConversationParticipant {
     @Builder.Default
     @Column(name = "joined_at", nullable = false)
     private LocalDateTime joinedAt =  LocalDateTime.now();
+
+    @Column(name = "is_read")
+    private Boolean isRead = true;
 }

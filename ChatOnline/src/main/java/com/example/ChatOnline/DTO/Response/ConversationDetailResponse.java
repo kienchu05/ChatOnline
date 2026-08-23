@@ -26,4 +26,5 @@ public class ConversationDetailResponse implements Serializable {
     private String lastMessageContent;
     private LocalDateTime lastMessageTime;
     private LocalDateTime createdAt;
+    private Boolean isRead;
 }

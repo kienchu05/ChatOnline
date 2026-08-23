@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class ChatMessageService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional(rollbackFor = Exception.class)
     public ChatMessageResponse sendMessage(String senderId, ChatMessageRequest request){
@@ -74,28 +76,43 @@ public class ChatMessageService {
         conversation.setLastMessageId(message.getId());
         conversation.setLastMessageTime(message.getSentAt());
         conversation.setLastMessageContent(message.getContent());
+        conversation.getConversationParticipantList().forEach(p -> {
+            // Nếu là người gửi -> đã đọc. Nếu là người nhận -> chưa đọc
+            p.setIsRead(p.getUser().getId().equals(senderId));
+        });
         conversationRepository.save(conversation);
 
-        // 6.Map entity sang DTO
-        return ChatMessageResponse.builder()
+        // Lay danh sach participants (kphai sender)
+        List<String> recipientsId = conversation.getConversationParticipantList()
+                .stream().filter(participant -> !participant.getUser().getId().equals(senderId))
+                .map(participant -> participant.getUser().getId()).toList();
+
+        //Build Response cho ChatMessageResponse
+        ChatMessageResponse response = ChatMessageResponse.builder()
                 .id(message.getId())
                 .tempId(request.tempId())
                 .conversationId(message.getConversation().getId())
                 .conversationAvatar(message.getConversation().getConversationAvatar())
-                .senderId(sender.getId())
-                .senderName(sender.getUsername())
+                .senderId(message.getSender().getId())
+                .senderName(message.getSender().getUsername())
                 .content(message.getContent())
                 .messageType(message.getMessageType())
                 .messageMedia(message.getMessageMediaList().stream()
                         .map(messageMedia -> MessageMediaResponse.builder()
-                                .fileName(messageMedia.getFileName())
                                 .fileType(messageMedia.getFileType())
+                                .fileName(messageMedia.getFileName())
                                 .thumbnailUrl(messageMedia.getThumbnailUrl())
                                 .uploadedAt(messageMedia.getUploadedAt())
                                 .build())
                         .toList())
-                .createdAt(message.getSentAt())
                 .build();
+
+        //Broadcast qua Websocket cho recipients
+        recipientsId.forEach(recipientId -> {
+            simpMessagingTemplate.convertAndSendToUser(recipientId,"/queue/messages", response);
+        });
+
+        return response;
     }
 
     public PageResponse<ChatMessageResponse> getMessagesByConversationId(

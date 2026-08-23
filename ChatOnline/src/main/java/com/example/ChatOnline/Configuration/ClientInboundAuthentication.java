@@ -41,7 +41,7 @@ public class ClientInboundAuthentication implements ChannelInterceptor {
         if(accessor != null){
             // chỉ authenticate khi client gửi STOMP CONNECT command
             if(StompCommand.CONNECT.equals(accessor.getCommand())){
-                String authorization = accessor.getFirstNativeHeader("Authorization ");
+                String authorization = accessor.getFirstNativeHeader("Authorization");
                 if(authorization == null || !authorization.startsWith("Bearer ")){
                     throw new MessageDeliveryException("Missing token");
                 }

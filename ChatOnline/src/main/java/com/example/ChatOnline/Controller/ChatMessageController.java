@@ -4,6 +4,11 @@ import com.example.ChatOnline.DTO.Request.ChatMessageRequest;
 import com.example.ChatOnline.DTO.Response.ApiResponse;
 import com.example.ChatOnline.DTO.Response.ChatMessageResponse;
 import com.example.ChatOnline.DTO.Response.PageResponse;
+import com.example.ChatOnline.Entity.ConversationParticipant;
+import com.example.ChatOnline.Enum.ErrorCode;
+import com.example.ChatOnline.Exception.AppException;
+import com.example.ChatOnline.Repository.ConversationParticipantRepository;
+import com.example.ChatOnline.Repository.ConversationRepository;
 import com.example.ChatOnline.Service.ChatMessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class ChatMessageController {
     private final ChatMessageService chatMessageService;
+    private final ConversationParticipantRepository conversationParticipantRepository;
 
     @PostMapping("/api/v1/chat-messages")
     public ApiResponse<ChatMessageResponse> sendMessage(
@@ -47,5 +53,18 @@ public class ChatMessageController {
                 .message("Messages retrieved successfully !")
                 .data(data)
                 .build();
+    }
+
+    @PutMapping("/api/v1/conversations/{id}/read")
+    public ApiResponse<Void> markAsRead(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        ConversationParticipant participant = conversationParticipantRepository
+                .findByConversationIdAndUserId(id, userId)
+                .orElseThrow(() -> new AppException(ErrorCode.PARTICIPANT_NOT_FOUND));
+
+        participant.setIsRead(true);
+        conversationParticipantRepository.save(participant);
+
+        return ApiResponse.<Void>builder().code(200).message("Marked as read").build();
     }
 }

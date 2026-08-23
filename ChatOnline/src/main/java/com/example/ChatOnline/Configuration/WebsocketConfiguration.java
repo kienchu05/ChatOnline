@@ -19,7 +19,7 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
     public void registerStompEndpoints(StompEndpointRegistry registry){
         // cho phép frontend kết nối tới backend
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOriginPatterns("*")
                 .addInterceptors(websocketHandshake); // để validate connection như việc ktra token ... trước khi được upgrade lên Websocket
     }
 
