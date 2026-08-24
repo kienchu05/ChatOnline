@@ -6,6 +6,9 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +34,9 @@ public class User implements UserDetails {
 
     @Column(columnDefinition = "TEXT")
     private String refreshToken;
+
+    private Boolean isOnline;
+    private LocalDateTime lastSeen;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default //Đảm bảo list không bao giờ bị null khi build object

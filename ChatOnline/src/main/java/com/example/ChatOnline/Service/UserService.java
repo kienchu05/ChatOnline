@@ -1,6 +1,7 @@
 package com.example.ChatOnline.Service;
 
 import com.example.ChatOnline.DTO.Request.CreateUserRequest;
+import com.example.ChatOnline.DTO.Request.UserStatus;
 import com.example.ChatOnline.DTO.Response.ApiResponse;
 import com.example.ChatOnline.DTO.Response.CreateUserResponse;
 import com.example.ChatOnline.DTO.Response.PageResponse;
@@ -25,6 +26,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

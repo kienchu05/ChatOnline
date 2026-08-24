@@ -67,4 +67,15 @@ public class ChatMessageController {
 
         return ApiResponse.<Void>builder().code(200).message("Marked as read").build();
     }
+
+    @DeleteMapping("/api/v1/messages/{messageId}")
+    public ApiResponse<Void> deleteMessage(@PathVariable String messageId, @AuthenticationPrincipal Jwt jwt) {
+        String currentUserId = jwt.getSubject();
+        chatMessageService.deleteMessage(messageId, currentUserId);
+
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Đã xóa tin nhắn")
+                .build();
+    }
 }

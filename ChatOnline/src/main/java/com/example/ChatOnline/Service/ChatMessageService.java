@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -171,5 +172,40 @@ public class ChatMessageService {
                 .totalElements(chatMessagePage.getTotalElements())
                 .content(responses)
                 .build();
+    }
+
+    @Transactional
+    public void deleteMessage(String messageId, String currentUserId) {
+        // 1. Tìm tin nhắn cần xóa trong DB
+        ChatMessage message = chatMessageRepository.findById(messageId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin nhắn"));
+        if (!message.getSender().getId().equals(currentUserId)) {
+            throw new RuntimeException("Bạn không có quyền xóa tin nhắn này");
+        }
+
+        Conversation conversation = message.getConversation();
+        chatMessageRepository.delete(message);
+        chatMessageRepository.flush();
+
+        // 2. Kiểm tra: Nếu tin nhắn vừa xóa chính là tin nhắn hiển thị ở danh sách Home
+        if (conversation.getLastMessageId() != null && conversation.getLastMessageId().equals(messageId)) {
+
+            // 3. Tìm tin nhắn cũ liền kề
+            Optional<ChatMessage> newLastMessage = chatMessageRepository
+                    .findTopByConversationIdOrderBySentAtDesc(conversation.getId());
+
+            if (newLastMessage.isPresent()) {
+                ChatMessage prevMsg = newLastMessage.get();
+                conversation.setLastMessageId(prevMsg.getId());
+                conversation.setLastMessageContent(prevMsg.getContent());
+                conversation.setLastMessageTime(prevMsg.getSentAt());
+            } else {
+                conversation.setLastMessageId(null);
+                conversation.setLastMessageContent(null);
+                conversation.setLastMessageTime(null);
+            }
+
+            conversationRepository.save(conversation);
+        }
     }
 }

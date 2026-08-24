@@ -6,8 +6,19 @@ import com.example.ChatOnline.DTO.Response.ParticipantResponse;
 import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Entity.ConversationParticipant;
 import com.example.ChatOnline.Enum.ConversationType;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+import java.time.Duration;
+import java.time.Instant;
+
+@Component
+@RequiredArgsConstructor
 public class ConversationMapper {
+
+    private final UserSessionService userSessionService;
+
+
     private ConversationMapper(){
     }
 
@@ -63,6 +74,31 @@ public class ConversationMapper {
                 .isRead(isRead)
                 .build();
 
+        if (conversationType == ConversationType.PRIVATE) {
+            // Private conversation: Check other user's online status
+            conversation.getConversationParticipantList().stream()
+                    .filter(p -> !p.getUser().getId().equals(creatorId))
+                    .findFirst()
+                    .ifPresent(p -> {
+                        String otherUserId = p.getUser().getId();
+                        boolean isOnline = userSessionService.isOnline(p.getUser().getId());
+                        String lastOnlineAt = userSessionService.getPresence(otherUserId)
+                                .map(presence -> formatLastOnlineAt(presence.getLastOnlineAt()))
+                                .orElse(null);
+
+                        response.setIsOnline(isOnline);
+                        response.setLastOnlineAt(lastOnlineAt);
+                    });
+        } else {
+            // Group conversation: Check if any member is online
+            boolean anyOnline = conversation.getParticipants().stream()
+                    .filter(p -> !p.getUser().getId().equals(creatorId))
+                    .anyMatch(p -> userSessionService.isOnline(p.getUser().getId()));
+
+            response.setIsOnline(anyOnline);
+        }
+
+
         //Ten cua conversation
         String name = resolveConversationName(creatorId, conversation);
         response.setName(name);
@@ -86,5 +122,16 @@ public class ConversationMapper {
                     .orElse(null);
         }
         return conversation.getName();
+    }
+
+    private String formatLastOnlineAt(Instant lastOnlineAt) {
+        if (lastOnlineAt == null) return null;
+
+        long minutes = Duration.between(lastOnlineAt, Instant.now()).toMinutes();
+
+        if (minutes < 1)    return "Vừa hoạt động xong";
+        if (minutes < 60)   return "Hoạt động " + minutes + " phút trước";
+        if (minutes < 1440) return "Hoạt động " + (minutes / 60) + " giờ trước";
+        return "Hoạt động " + (minutes / 1440) + " ngày trước";
     }
 }
