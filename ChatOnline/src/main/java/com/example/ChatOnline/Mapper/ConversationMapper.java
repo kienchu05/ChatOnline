@@ -6,6 +6,8 @@ import com.example.ChatOnline.DTO.Response.ParticipantResponse;
 import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Entity.ConversationParticipant;
 import com.example.ChatOnline.Enum.ConversationType;
+import com.example.ChatOnline.Service.UserSessionService;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -15,14 +17,9 @@ import java.time.Instant;
 @Component
 @RequiredArgsConstructor
 public class ConversationMapper {
-
     private final UserSessionService userSessionService;
 
-
-    private ConversationMapper(){
-    }
-
-    public static CreateConversationResponse toConversationResponse(String creatorId, Conversation conversation){
+    public CreateConversationResponse toConversationResponse(String creatorId, Conversation conversation){
         ConversationType conversationType = conversation.getConversationType();
         //Thong tin co ban ve conversation
         CreateConversationResponse response = CreateConversationResponse.builder()
@@ -50,7 +47,7 @@ public class ConversationMapper {
         return response;
     }
 
-    public static ConversationDetailResponse toConversationDetailResponse(String creatorId, Conversation conversation){
+    public ConversationDetailResponse toConversationDetailResponse(String creatorId, Conversation conversation){
         ConversationType conversationType = conversation.getConversationType();
 
         Boolean isRead = conversation.getConversationParticipantList().stream()
@@ -75,7 +72,6 @@ public class ConversationMapper {
                 .build();
 
         if (conversationType == ConversationType.PRIVATE) {
-            // Private conversation: Check other user's online status
             conversation.getConversationParticipantList().stream()
                     .filter(p -> !p.getUser().getId().equals(creatorId))
                     .findFirst()
@@ -91,7 +87,7 @@ public class ConversationMapper {
                     });
         } else {
             // Group conversation: Check if any member is online
-            boolean anyOnline = conversation.getParticipants().stream()
+            boolean anyOnline = conversation.getConversationParticipantList().stream()
                     .filter(p -> !p.getUser().getId().equals(creatorId))
                     .anyMatch(p -> userSessionService.isOnline(p.getUser().getId()));
 

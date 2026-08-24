@@ -9,6 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface ConversationParticipantRepository extends JpaRepository<ConversationParticipant,String> {
-    @Query("select c from ConversationParticipant c where c.id = :conversationId and c.user.id = :userId")
     Optional<ConversationParticipant> findByConversationIdAndUserId(String conversationId, String userId);
 }

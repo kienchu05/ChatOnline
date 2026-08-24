@@ -1,8 +1,6 @@
 package com.example.ChatOnline.Service;
 
 import com.example.ChatOnline.DTO.Request.CreateUserRequest;
-import com.example.ChatOnline.DTO.Request.UserStatus;
-import com.example.ChatOnline.DTO.Response.ApiResponse;
 import com.example.ChatOnline.DTO.Response.CreateUserResponse;
 import com.example.ChatOnline.DTO.Response.PageResponse;
 import com.example.ChatOnline.DTO.Response.UserDetailResponse;
@@ -12,14 +10,12 @@ import com.example.ChatOnline.Enum.ErrorCode;
 import com.example.ChatOnline.Exception.AppException;
 import com.example.ChatOnline.Repository.RoleRepository;
 import com.example.ChatOnline.Repository.UserRepository;
-import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;

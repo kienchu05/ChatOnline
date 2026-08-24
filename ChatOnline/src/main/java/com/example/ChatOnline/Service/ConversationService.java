@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class ConversationService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
+    private final ConversationMapper conversationMapper;
 
     public CreateConversationResponse createConversation(String creatorId, CreateConversationRequest request) {
         List<String> participantIds = request.getParticipantIds();
@@ -69,7 +70,7 @@ public class ConversationService {
             Optional<Conversation> conversation = conversationRepository.findByParticipantHash(participantHash);
             if (conversation.isPresent()) {
                 //Tra ve cuoc tro chuyen cu neu da ton tai
-                return ConversationMapper.toConversationResponse(creatorId, conversation.get());
+                return conversationMapper.toConversationResponse(creatorId, conversation.get());
             }
         }
 
@@ -99,7 +100,7 @@ public class ConversationService {
         participantsInfo.forEach(conversation::addParticipants);
         conversationRepository.save(conversation);
         //Map entity sang response DTO
-        return ConversationMapper.toConversationResponse(creatorId, conversation);
+        return conversationMapper.toConversationResponse(creatorId, conversation);
     }
 
     public PageResponse<ConversationDetailResponse> getMyConversation(
@@ -113,7 +114,7 @@ public class ConversationService {
         List<Conversation> conversations = conversationPage.getContent();
         //Map tu entity conversations sang DTO response
         List<ConversationDetailResponse> responses = conversations.stream()
-                .map(conversation -> ConversationMapper.toConversationDetailResponse(userId, conversation))
+                .map(conversation -> conversationMapper.toConversationDetailResponse(userId, conversation))
                 .toList();
 
         //Build response voi thong tin pagination
