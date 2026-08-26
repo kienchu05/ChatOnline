@@ -31,7 +31,6 @@ public class RedisConfiguration {
 
         //Ép Spring Boot mã hóa các Key thành chuỗi văn bản thông thường.
         // Nhờ vậy, khi lưu vào Redis, key của bạn sẽ hiển thị rõ ràng là "user:123:sessions" thay vì một đống byte rác.
-        //Java
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
         template.setKeySerializer(stringSerializer);
         template.setHashKeySerializer(stringSerializer);

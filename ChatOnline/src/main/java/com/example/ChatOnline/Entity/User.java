@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -36,7 +37,7 @@ public class User implements UserDetails {
     private String refreshToken;
 
     private Boolean isOnline;
-    private LocalDateTime lastSeen;
+    private Instant lastSeen;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default //Đảm bảo list không bao giờ bị null khi build object

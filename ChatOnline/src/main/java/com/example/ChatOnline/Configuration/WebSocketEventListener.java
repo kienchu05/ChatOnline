@@ -1,4 +1,5 @@
 package com.example.ChatOnline.Configuration;
+
 import com.example.ChatOnline.Constant.DateTimeUtils;
 import com.example.ChatOnline.DTO.Request.PresenceEvent;
 import com.example.ChatOnline.Service.UserSessionService;
@@ -13,9 +14,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import java.security.Principal;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
@@ -23,58 +22,69 @@ import java.util.Optional;
 public class WebSocketEventListener {
 
     private final UserSessionService userSessionService;
+
     private final SimpMessagingTemplate messagingTemplate;
 
     @EventListener
     public void onConnect(SessionConnectEvent event) {
-        StompHeaderAccessor accessor  = StompHeaderAccessor.wrap(event.getMessage());
+        //Lấy thông tin user và sessionId từ Websocket message
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
+
         Principal user = accessor.getUser();
-        if(user == null || user.getName() == null) {
+        if (user == null || user.getName() == null) {
+            log.warn("WebSocket connect nhưng không xác định được user");
             return;
         }
 
         String userId = user.getName();
         String sessionId = accessor.getSessionId();
-
-        // 1. Lưu session vào Redis
         userSessionService.saveSession(userId, sessionId);
-        log.info("User {} connected with session {}", userId, sessionId);
 
-        // 2. Bắn sự kiện online tới /topic/presence
-        PresenceEvent presenceEvent = PresenceEvent.builder()
-                .userId(userId)
-                .isOnline(true)
-                .lastOnlineAt(null)
-                .build();
-
+        // ĐÁNH DẤU ONLINE DATABASE
+        userSessionService.markOnline(userId);
+        log.info("User {} ONLINE - session {}",userId,sessionId);
+        // BROADCAST PRESENCE
+        PresenceEvent presenceEvent =
+                PresenceEvent.builder()
+                        .userId(userId)
+                        .isOnline(true)
+                        .lastOnlineAt(null)
+                        .build();
         messagingTemplate.convertAndSend("/topic/presence", presenceEvent);
     }
 
+    // DISCONNECT
     @EventListener
     public void onDisconnect(SessionDisconnectEvent event) {
-        StompHeaderAccessor accessor  = StompHeaderAccessor.wrap(event.getMessage());
+        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         Principal user = accessor.getUser();
-        if(user == null || user.getName() == null) {
+
+        if (user == null) {
+            log.warn("WebSocket disconnect nhưng không có Principal");
             return;
         }
+
         String userId = user.getName();
         String sessionId = accessor.getSessionId();
-        // 1. Xóa session khỏi Redis
+        log.info("User {} DISCONNECTED - session {}",userId, sessionId);
+
         userSessionService.removeSession(userId, sessionId);
-        log.info("User {} disconnected with session {}", userId, sessionId);
+        boolean online = userSessionService.isOnline(userId);
+        if (!online) {
+            log.info("User {} OFFLINE", userId);
+            // DB -> OFFLINE
+            userSessionService.markOffline(userId);
+            // Broadcast
+            PresenceEvent presenceEvent =
+                    PresenceEvent.builder()
+                            .userId(userId)
+                            .isOnline(false)
+                            .lastOnlineAt(Instant.now())
+                            .build();
 
-        // 2. Chỉ broadcast offline khi user không còn session nào đang hoạt động
-        if (!userSessionService.isOnline(userId)) {
-            PresenceEvent presenceEvent = PresenceEvent.builder()
-                    .userId(userId)
-                    .isOnline(false)
-                    .lastOnlineAt(DateTimeUtils.formatLastOnlineAt(Instant.now()))
-                    .build();
-
-            messagingTemplate.convertAndSend(
-                    "/topic/presence",
-                    presenceEvent
-            );
-        }}
-
+            messagingTemplate.convertAndSend("/topic/presence",presenceEvent);
+        } else {
+            log.info("User {} vẫn còn session WebSocket khác",userId);
+        }
+    }
 }

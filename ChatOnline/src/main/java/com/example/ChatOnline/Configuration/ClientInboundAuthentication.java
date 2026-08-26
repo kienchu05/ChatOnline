@@ -61,7 +61,6 @@ public class ClientInboundAuthentication implements ChannelInterceptor {
 
                     //set authenticated user vafo accessor rồi tạo quan hệ với websocket session
                     accessor.setUser(new UsernamePasswordAuthenticationToken(userId,null, authorities));
-
                     log.info("Websocket connected - userId {}", userId);
                 }catch (JwtException e){
                     log.warn("Invalid Token : {}" , e.getMessage());

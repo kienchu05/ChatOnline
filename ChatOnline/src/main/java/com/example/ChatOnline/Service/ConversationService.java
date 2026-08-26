@@ -39,7 +39,6 @@ public class ConversationService {
         if (!participantIds.contains(creatorId)) {
             participantIds.add(creatorId);
         }
-
         //Lay thong tin tat ca participants tu database
         List<User> participantsInfo = userRepository.findAllById(participantIds);
 
@@ -56,11 +55,9 @@ public class ConversationService {
             if (participantsInfo.size() != 2) {
                 throw new AppException(ErrorCode.INVALID_PARTICIPANT_COUNT);
             }
-
             // Tạo participant hash để identify unique conversation
             // Sort userId để đảm bảo hash luôn giống nhau cho cùng 2 người
             // Ví dụ: userId1="abc", userId2="xyz" -> hash="abc_xyz"
-
             participantHash = participantsInfo.stream()
                     .map(user -> user.getId())
                     .sorted()

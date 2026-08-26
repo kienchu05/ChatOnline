@@ -58,6 +58,9 @@ public class ChatMessageController {
     @PutMapping("/api/v1/conversations/{id}/read")
     public ApiResponse<Void> markAsRead(@PathVariable String id, @AuthenticationPrincipal Jwt jwt) {
         String userId = jwt.getSubject();
+        System.out.println("========== MARK AS READ ==========");
+        System.out.println("conversationId = " + id);
+        System.out.println("userId        = " + userId);
         ConversationParticipant participant = conversationParticipantRepository
                 .findByConversationIdAndUserId(id, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PARTICIPANT_NOT_FOUND));

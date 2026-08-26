@@ -76,7 +76,7 @@ public class ChatMessageService {
         // 5. Update lastMessage cua conversation
         conversation.setLastMessageId(message.getId());
         conversation.setLastMessageTime(message.getSentAt());
-        conversation.setLastMessageContent(message.getContent());
+        conversation.setLastMessageContent(message.getContent() != null && !message.getContent().isEmpty() ? message.getContent() : "Đã gửi hình ảnh/video !");
         conversation.getConversationParticipantList().forEach(p -> {
             // Nếu là người gửi -> đã đọc. Nếu là người nhận -> chưa đọc
             p.setIsRead(p.getUser().getId().equals(senderId));
@@ -112,7 +112,6 @@ public class ChatMessageService {
         recipientsId.forEach(recipientId -> {
             simpMessagingTemplate.convertAndSendToUser(recipientId,"/queue/messages", response);
         });
-
         return response;
     }
 

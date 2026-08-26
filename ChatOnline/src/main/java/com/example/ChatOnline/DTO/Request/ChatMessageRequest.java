@@ -11,15 +11,11 @@ import java.util.List;
 public record ChatMessageRequest(
         String tempId, //map tempId voi messageId thuc ,
         // User se nhin thay tin nhan truc tiep luon ma khong can doi response
-
         @NotBlank(message = "ConversationId is required !")
         String conversationId,
-
         String content,
-
         @NotNull(message = "Message type is required !")
         MessageType messageType,
-
         List<MessageMediaRequest> messageMedia // danh sach media files (optional)
 ) {
 }

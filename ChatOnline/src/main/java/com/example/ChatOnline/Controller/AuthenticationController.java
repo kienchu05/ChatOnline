@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,6 +25,14 @@ public class AuthenticationController {
                 .code(HttpStatus.OK.value())
                 .message("Login successfully")
                 .data(data)
+                .build();
+    }
+
+    @PostMapping("/api/v1/auth/logout")
+    public ApiResponse<Void> logout(@RequestHeader("Authorization") String token) {
+        return ApiResponse.<Void>builder()
+                .code(200)
+                .message("Đăng xuất thành công")
                 .build();
     }
 }
