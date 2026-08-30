@@ -38,6 +38,12 @@ public class User implements UserDetails {
 
     private Boolean isOnline;
     private Instant lastSeen;
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean locked = false;
+
+    private LocalDateTime lockedUntil;
+
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Builder.Default //Đảm bảo list không bao giờ bị null khi build object

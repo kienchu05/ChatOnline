@@ -55,7 +55,6 @@ public class UserSessionService {
     }
 
     public void removeSession(String userId, String sessionId) {
-
         String sessionKey = SESSION_PREFIX + sessionId;
         String userSessionsKey = String.format(USER_SESSIONS, userId);
         // 1. Xóa session

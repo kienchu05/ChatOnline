@@ -42,6 +42,11 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(
+                                "/api/v1/passwd/forgot-password",
+                                "/api/v1/passwd/verify-otp",
+                                "/api/v1/passwd/reset-password"
+                        ).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated()
                 )
