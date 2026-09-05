@@ -30,7 +30,6 @@ public class JwtService {
         Date expireTime = new Date(Instant.now().plus(2, ChronoUnit.HOURS).toEpochMilli());
 
         String jwtId = UUID.randomUUID().toString();
-
         // Day la nhung gi co trong payload cua token
         JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
                 .subject(userId)
@@ -39,7 +38,6 @@ public class JwtService {
                 .jwtID(jwtId)
                 .claim("roles", authorities)
                 .build();
-
         //payload
         Payload payload = new Payload(claimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);

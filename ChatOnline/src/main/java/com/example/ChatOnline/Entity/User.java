@@ -37,7 +37,9 @@ public class User implements UserDetails {
     private String refreshToken;
 
     private Boolean isOnline;
+
     private Instant lastSeen;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean locked = false;

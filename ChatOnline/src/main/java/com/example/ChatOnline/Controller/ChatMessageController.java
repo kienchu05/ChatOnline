@@ -4,6 +4,7 @@ import com.example.ChatOnline.DTO.Request.ChatMessageRequest;
 import com.example.ChatOnline.DTO.Response.ApiResponse;
 import com.example.ChatOnline.DTO.Response.ChatMessageResponse;
 import com.example.ChatOnline.DTO.Response.PageResponse;
+import com.example.ChatOnline.DTO.Response.UserDetailResponse;
 import com.example.ChatOnline.Entity.ConversationParticipant;
 import com.example.ChatOnline.Enum.ErrorCode;
 import com.example.ChatOnline.Exception.AppException;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -79,6 +82,34 @@ public class ChatMessageController {
         return ApiResponse.<Void>builder()
                 .code(200)
                 .message("Đã xóa tin nhắn")
+                .build();
+    }
+
+    @GetMapping("/api/v1/{conversationId}/search-messages")
+    public ApiResponse<PageResponse<ChatMessageResponse>> searchMessages(
+            @PathVariable("conversationId") String conversationId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "5") int size){
+        var data = chatMessageService.searchMessages(conversationId,keyword, page,size);
+
+        return ApiResponse.<PageResponse<ChatMessageResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Messages retrieved successfully !")
+                .data(data)
+                .build();
+    }
+
+    @GetMapping("/api/v1/{conversationId}/media")
+    public ApiResponse<List<ChatMessageResponse>> getConversationMedia(
+            @PathVariable String conversationId) {
+
+        var data = chatMessageService.getConversationMedia(conversationId);
+
+        return ApiResponse.<List<ChatMessageResponse>>builder()
+                .code(HttpStatus.OK.value())
+                .message("Media retrieved successfully!")
+                .data(data)
                 .build();
     }
 }

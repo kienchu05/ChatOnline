@@ -10,6 +10,7 @@ import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Entity.MessageMedia;
 import com.example.ChatOnline.Entity.User;
 import com.example.ChatOnline.Enum.ErrorCode;
+import com.example.ChatOnline.Enum.MessageType;
 import com.example.ChatOnline.Exception.AppException;
 import com.example.ChatOnline.Repository.ChatMessageRepository;
 import com.example.ChatOnline.Repository.ConversationRepository;
@@ -25,6 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,14 +42,14 @@ public class ChatMessageService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Transactional(rollbackFor = Exception.class)
-    public ChatMessageResponse sendMessage(String senderId, ChatMessageRequest request){
+    public ChatMessageResponse sendMessage(String senderId, ChatMessageRequest request) {
         // 1.Validate sender ton tai
         User sender = userRepository.findById(senderId)
-                .orElseThrow(() ->  new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // 2. Validate conversation ton tai va sender la member trong conversation do
         Conversation conversation = conversationRepository.findByIdAndMember(request.conversationId(), senderId)
-                .orElseThrow(() ->  new AppException(ErrorCode.NOT_CONVERSATION_MEMBER));
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_CONVERSATION_MEMBER));
 
         // 3. Tao danh sach media files (neu co)
         List<MessageMedia> media = request.messageMedia() != null && !request.messageMedia().isEmpty() ?
@@ -110,7 +113,7 @@ public class ChatMessageService {
 
         //Broadcast qua Websocket cho recipients
         recipientsId.forEach(recipientId -> {
-            simpMessagingTemplate.convertAndSendToUser(recipientId,"/queue/messages", response);
+            simpMessagingTemplate.convertAndSendToUser(recipientId, "/queue/messages", response);
         });
         return response;
     }
@@ -118,10 +121,10 @@ public class ChatMessageService {
     public PageResponse<ChatMessageResponse> getMessagesByConversationId(
             String conversationId,
             int page, int size
-    ){
+    ) {
         //1. lay thong tin user trong securityContextHolder(luu tru thong tin authentication cua request hien tai)
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if(authentication == null){
+        if (authentication == null) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -135,7 +138,7 @@ public class ChatMessageService {
         //4. Tao page va sort theo tin nhan moi nhat theo sentAt
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "sentAt"));
 
-        Page<ChatMessage> chatMessagePage= chatMessageRepository.findByConversationId(conversationId, pageable);
+        Page<ChatMessage> chatMessagePage = chatMessageRepository.findByConversationId(conversationId, pageable);
 
         //5.Lay danh sach messages tu Page object
         List<ChatMessage> messages = chatMessagePage.getContent();
@@ -206,5 +209,75 @@ public class ChatMessageService {
 
             conversationRepository.save(conversation);
         }
+    }
+
+    public PageResponse<ChatMessageResponse> searchMessages(String conversationId, String keyword, int page, int size) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<ChatMessage> messages;
+
+        if (keyword == null || keyword.isBlank()) {
+            messages = chatMessageRepository.findByConversationIdOrderBySentAtDesc(conversationId, pageable);
+        } else {
+            messages = chatMessageRepository.searchMessages(conversationId, keyword, pageable);
+        }
+
+        List<ChatMessageResponse> responses = messages.getContent()
+                .stream()
+                .map(message -> ChatMessageResponse.builder()
+                        .id(message.getId())
+                        .senderId(message.getSender().getId())
+                        .senderName(message.getSender().getUsername())
+                        .conversationId(message.getConversation().getId())
+                        .content(message.getContent())
+                        .createdAt(message.getSentAt())
+                        .build()
+                ).toList();
+
+        return PageResponse.<ChatMessageResponse>builder()
+                .currentPage(page)
+                .pageSize(size)
+                .totalPages(messages.getTotalPages())
+                .totalElements(messages.getTotalElements())
+                .content(responses)
+                .build();
+    }
+
+    public List<ChatMessageResponse> getConversationMedia(String conversationId){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null){
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        List<ChatMessage> messages = chatMessageRepository.findMediaMessages(conversationId, List.of(MessageType.IMAGE, MessageType.VIDEO));
+
+        List<ChatMessageResponse> responses = messages.stream()
+                .map(message -> ChatMessageResponse.builder()
+                        .id(message.getId())
+                        .messageType(message.getMessageType())
+                        .conversationId(message.getConversation().getId())
+                        .senderName(message.getSender().getUsername())
+                        .senderId(message.getSender().getId())
+                        .messageMedia(
+                                message.getMessageMediaList() == null
+                                        ? List.of()
+                                        : message.getMessageMediaList().stream()
+                                          .map(media -> MessageMediaResponse.builder()
+                                                        .fileName(media.getFileName())
+                                                        .thumbnailUrl(media.getThumbnailUrl())
+                                                        .fileType(media.getFileType())
+                                                        .uploadedAt(message.getSentAt())
+                                                        .build())
+                                          .toList()
+                        )
+                        .build())
+                .toList();
+
+        return responses;
     }
 }
