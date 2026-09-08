@@ -109,10 +109,7 @@ public class UserSessionService {
             String sessionId = String.valueOf(session);
             boolean exists = Boolean.TRUE.equals(redisTemplate.hasKey(SESSION_PREFIX + sessionId));
             if (!exists) {
-                redisTemplate.opsForSet().remove(
-                        userSessionsKey,
-                        sessionId
-                );
+                redisTemplate.opsForSet().remove(userSessionsKey, sessionId);
             }
         }
     }

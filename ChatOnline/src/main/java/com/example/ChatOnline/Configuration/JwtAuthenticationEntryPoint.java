@@ -28,7 +28,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
                 .status(errorCode.getHttpStatus().value()) // 401
                 .error(errorCode.getHttpStatus().getReasonPhrase()) // Unauthorized
                 .message(errorCode.getMessage()) // Authentication is required !
-                .path(request.getRequestURI()) ///api/auth/user ....
+                .path(request.getRequestURI()) // api/auth/user ....
                 .build();
         //Chuyen doi sang kieu Json
         JsonMapper jsonMapper = new JsonMapper();

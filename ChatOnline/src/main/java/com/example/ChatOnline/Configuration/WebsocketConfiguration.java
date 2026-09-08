@@ -11,7 +11,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @Configuration
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
-public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer { //Định nghĩa endpoint để clients connect
+public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer { //định nghĩa endpoint để clients connect
     private final WebsocketHandshake websocketHandshake;
     private final ClientInboundAuthentication authentication;
 
@@ -25,8 +25,8 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
 
         @Override
     public void configureMessageBroker(MessageBrokerRegistry registry){
-        // /topic : đăng kí user trong cuộc hội thoại như nhóm hoặc broadcast(1 - N)
-            // /queue : (1 - 1) (Private conversation)
+            // topic : đăng kí user trong cuộc hội thoại như nhóm hoặc broadcast(1 - N)
+            // queue : (1 - 1) (Private conversation)
             registry.enableSimpleBroker("/topic", "/queue");
 
             // Prefix cho messages từ client → server
@@ -34,14 +34,14 @@ public class WebsocketConfiguration implements WebSocketMessageBrokerConfigurer 
             registry.setApplicationDestinationPrefixes("/app");
 
             // Prefix cho user-specific destinations
-            // Cho phép gửi messages đến specific user session.
-            // Mỗi user session có unique destination, đảm bảo message chỉ đến đúng người.
+            // Cho phép gửi messages đến specific user session
+            // Mỗi user session có unique destination, đảm bảo message chỉ đến đúng người
             registry.setUserDestinationPrefix("/user");
         }
 
         @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-            // Register ChannelInterceptor để authenticate STOMP CONNECT frames
+            // đăng kí ChannelInterceptor để authenticate STOMP CONNECT frames
             registration.interceptors(authentication);
         }
 }

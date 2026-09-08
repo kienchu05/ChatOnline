@@ -40,7 +40,7 @@ public class WebSocketEventListener {
         String sessionId = accessor.getSessionId();
         userSessionService.saveSession(userId, sessionId);
 
-        // ĐÁNH DẤU ONLINE DATABASE
+        // online db
         userSessionService.markOnline(userId);
         log.info("User {} ONLINE - session {}",userId,sessionId);
         // BROADCAST PRESENCE

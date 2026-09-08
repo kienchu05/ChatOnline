@@ -3,6 +3,7 @@ package com.example.ChatOnline.Mapper;
 import com.example.ChatOnline.DTO.Response.ConversationDetailResponse;
 import com.example.ChatOnline.DTO.Response.CreateConversationResponse;
 import com.example.ChatOnline.DTO.Response.ParticipantResponse;
+import com.example.ChatOnline.Entity.ChatMessage;
 import com.example.ChatOnline.Entity.Conversation;
 import com.example.ChatOnline.Entity.ConversationParticipant;
 import com.example.ChatOnline.Enum.ConversationType;
@@ -68,6 +69,8 @@ public class ConversationMapper {
                 .lastMessageTime(conversation.getLastMessageTime())
                 .lastMessageContent(conversation.getLastMessageContent())
                 .lastMessageId(conversation.getLastMessageId())
+                .lastMessageSenderName(conversation.getLastMessageSenderName())
+                .lastMessageSenderId(conversation.getLastMessageSenderId())
                 .isRead(isRead)
                 .build();
 
@@ -93,7 +96,6 @@ public class ConversationMapper {
 
             response.setIsOnline(anyOnline);
         }
-
 
         //Ten cua conversation
         String name = resolveConversationName(creatorId, conversation);

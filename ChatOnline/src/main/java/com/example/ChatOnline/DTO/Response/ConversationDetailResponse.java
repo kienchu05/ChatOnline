@@ -29,4 +29,6 @@ public class ConversationDetailResponse implements Serializable {
     private Boolean isRead;
     private Boolean isOnline;
     private String lastOnlineAt;
+    private String lastMessageSenderName;
+    private String lastMessageSenderId;
 }

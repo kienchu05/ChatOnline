@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,7 +34,7 @@ public class ConversationService {
     private final ConversationMapper conversationMapper;
 
     public CreateConversationResponse createConversation(String creatorId, CreateConversationRequest request) {
-        List<String> participantIds = request.getParticipantIds();
+        List<String> participantIds = new ArrayList<>(request.getParticipantIds());
 
         //dam bao creator cung nam trong nhom
         if (!participantIds.contains(creatorId)) {
